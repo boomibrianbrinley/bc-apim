@@ -1,0 +1,15 @@
+{
+  "name": "bc-apim-forked",
+  "description": "Local marketplace for the bc-apim fork with optional API Gateway gateway targeting",
+  "owner": {
+    "name": "bc-apim-forked maintainers"
+  },
+  "plugins": [
+    {
+      "name": "bc-apim",
+      "description": "Build with Boomi's API management products, with optional gateway targeting for API Gateway applications",
+      "version": "0.0.3",
+      "source": "./"
+    }
+  ]
+}

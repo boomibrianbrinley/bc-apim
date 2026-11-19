@@ -6,6 +6,40 @@ Boomi Companion plugin for Boomi API management.
 
 This project is licensed under the [BSD-2-Clause License](LICENSE). If you fork or modify this code, you should not use the name "Boomi" for your version.
 
+## Install this fork
+
+This fork adds optional gateway targeting to `boomi-api-gateway` (see the Changelog). It's not on the public marketplace, so install it from a local clone. We tested these steps against Claude Code's plugin CLI in an isolated config.
+
+1. **Remove the upstream plugin**, if you have it installed. Both copies use the plugin name `bc-apim`, so they clash.
+
+   ```
+   claude plugin uninstall bc-apim@boomi-companion
+   ```
+
+2. **Clone this repo** to a folder you'll keep. Claude Code reads the plugin from this path, so don't move it later.
+
+   ```
+   git clone https://github.com/boomi-internal/bc-apim-forked.git
+   ```
+
+3. **Add the repo as a local marketplace.** The repo ships its own `.claude-plugin/marketplace.json`, so the folder is the marketplace.
+
+   ```
+   claude plugin marketplace add /path/to/bc-apim-forked
+   ```
+
+4. **Install the plugin** from that marketplace.
+
+   ```
+   claude plugin install bc-apim@bc-apim-forked
+   ```
+
+5. **Confirm it loaded.** `claude plugin list` should show `bc-apim@bc-apim-forked` at version `0.0.3`, enabled.
+
+To pick up later changes, run `git pull` in the clone, then `claude plugin marketplace update bc-apim-forked`.
+
+Credentials and environment variables are the same as upstream (see below). Put them in the workspace `.env`, not in the repo.
+
 ## Feedback & Issues
 
 Found a bug or have a feature idea? Email developer-offerings@boomi.com with a clear description, steps to reproduce, and any relevant error messages.

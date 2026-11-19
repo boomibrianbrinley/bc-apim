@@ -5,6 +5,7 @@
 - boomi-api-gateway: add optional gateway targeting. `agw-application.sh create --gateway <id|name>` and `list --gateway <id|name>` use GraphQL `DeployedApiApplication`, the only surface that records a gateway. Without the flag, behavior is unchanged (REST, account-level).
 - boomi-api-gateway: add `agw-gateway.sh` with `list [--all]`, `get <id>`, and `environments <id|name>` (environments attached to a gateway, via GraphQL).
 - boomi-api-gateway: add GraphQL helper `agw_graphql` and gateway resolver `agw_resolve_gateway` to `agw-common.sh`. Endpoint is `${BOOMI_API_URL}/graphql`; requires the `X-Account` header.
+- Add `.claude-plugin/marketplace.json` so the repo installs as a local marketplace (`bc-apim@bc-apim-forked`); bump plugin version to 0.0.3; add an install section to the README.
 - Verified live against one account: gateway list and environment list (read-only), gateway-scoped create, list, and delete of a test application.
 
 ## 0.0.2
