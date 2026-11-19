@@ -256,3 +256,41 @@ agw_filter_from_args() {
          elif length == 1 then {"QueryFilter":{"expression": .[0]}}
          else {"QueryFilter":{"expression":{"operator":"and","nestedExpression": .}}} end' <<<"$exprs"
 }
+
+# --- GraphQL (platform endpoint, same Basic credentials as REST) ---
+# Gateway targeting lives only in GraphQL: DeployedApiApplication takes a gatewayId, and
+# the REST Application object does not. Added in the fork (see CHANGELOG).
+
+# Posts a GraphQL document and prints its `data` object as compact JSON.
+# Usage: agw_graphql <document> [variables-json]
+agw_graphql() {
+  local doc="$1" vars="${2:-}"
+  [[ -n "$vars" ]] || vars='{}'
+  local body
+  body=$(jq -cn --arg q "$doc" --argjson v "$vars" '{query: $q, variables: $v}')
+  json_body "$body"
+  agw_api -X POST -H "Content-Type: application/json" -H "X-Account: ${BOOMI_ACCOUNT_ID}" \
+    --data-binary "@$BODY_FILE" "${BOOMI_API_URL%/}/graphql"
+  agw_ok || { echo "ERROR: GraphQL HTTP $RESPONSE_CODE" >&2; echo "$RESPONSE_BODY" >&2; return 1; }
+  if echo "$RESPONSE_BODY" | jq -e '(.errors // []) | length > 0' >/dev/null; then
+    echo "ERROR: GraphQL returned errors:" >&2
+    echo "$RESPONSE_BODY" | jq -c '.errors' >&2
+    return 1
+  fi
+  echo "$RESPONSE_BODY" | jq -c '.data'
+}
+
+# Resolves an active gateway by id or exact name. Prints its id; fails unless exactly one matches.
+# Usage: agw_resolve_gateway <id-or-name>
+agw_resolve_gateway() {
+  local ref="$1" data result
+  data=$(agw_graphql 'query { gateways { id name deleted } }') || return 1
+  result=$(echo "$data" | jq -r --arg r "$ref" \
+    '[.gateways[] | select(.deleted != true and (.id == $r or .name == $r))] | unique_by(.id)
+     | if length == 1 then .[0].id elif length == 0 then "NONE" else "MULTIPLE" end')
+  case "$result" in
+    NONE) echo "ERROR: no active gateway matches '$ref'. Run agw-gateway.sh list." >&2; return 1 ;;
+    MULTIPLE) echo "ERROR: more than one active gateway matches '$ref'; pass its id." >&2; return 1 ;;
+  esac
+  echo "$result"
+}
